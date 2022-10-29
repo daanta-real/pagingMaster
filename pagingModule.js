@@ -1,3 +1,4 @@
+// TODO: 추가적인  넣는 옵션 추가, 연속출력 여부 담는 옵션 추가
 // 필요 정보를 담은 객체를 입력하면 페이징 정보를 추가해서 반환해 주는 함수
 // 필요 정보: 객체. currPage(현재페이지), totalArticles(전체 글 수), rowsPerPage(1페이지 당 글 수), pagesPerView(1뷰 당 페이지 수)
 // IE 11 CAPABLE
@@ -11,8 +12,10 @@ function getPagingProps(p) {
     });
 
     // Pre-assign calculated values
-    p.currView = null, p.min = null, p.max = null, p.toPrev = null, p.toNext = null, p.toFirst = null, p.toLast = null, // newly calculated page prefs
-    p.hasPrev = null, p.hasNext = null, p.hasFirst = null, p.hasLast = null; // whether display or not for each btn
+    p.currView = p.min = p.max = null,                                  // Infoes about current view
+    p.hasPrev = p.hasNext = p.toPrev = p.toNext = null,                 // to PREV / NEXT view
+    p.hasJumpPrev = p.hasJumpNext = p.toJumpPrev = p.toJumpNext = null, // to PREV JUMP / NEXT JUMP view
+    p.hasFirst = p.hasLast = p.toFirst = p.toLast = null;               // to FIRST / LAST view
 
     // Basic props
     p.lastPage = Math.ceil(p.totalArticles / p.rowsPerPage);
@@ -27,6 +30,14 @@ function getPagingProps(p) {
     p.hasNext = p.max < p.lastPage;
     if(p.hasPrev) p.toPrev = p.min - p.pagesPerView;
     if(p.hasNext) p.toNext = p.max + 1;
+
+    // jumpBefore, jumpNext
+    // You mayebe need use this if you need to jump over than just one view.
+    if(!!p.jumpAmount) { // page amount for jumping
+        p.hasJumpPrev = p.min > (p.rowsPerPage - p.jumpAmount);
+        p.hasJumpNext = (p.max + p.jumpAmount) < p.lastPage;
+        p.toJumpPrev = 
+    }
 
     // first, last
     p.hasFirst = p.min > p.pagesPerView * 2;
