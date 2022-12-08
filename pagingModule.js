@@ -1,53 +1,68 @@
+class pagingMaster {
+
+    constructor(currPage, totalArticles, rowsPerPage, pagesPerView) {
+
+
+        this.currPage = currPage;
+        this.totalArticles = totalArticles;
+        this.rowsPerPage = rowsPerPage;
+        this.pagesPerView = pagesPerView;
+    }
+    
+    getPagingProps(p) {
+
+        // Chksum
+        if(typeof p === "undefined") throw new Error("'p' object required");
+        if(typeof p != "object") throw new Error("'p' must be an object");
+        ["currPage", "totalArticles", "rowsPerPage", "pagesPerView"].forEach(function(i) {
+            if(!p.hasOwnProperty(i) || isNaN(parseFloat(p[i]))) throw new Error("'" + i + "' has an error");
+        });
+
+        // Pre-assign calculated values
+        p.currView = p.min = p.max = null,                                  // Infoes about current view
+        p.hasPrev = p.hasNext = p.toPrev = p.toNext = null,                 // to PREV / NEXT view
+        p.hasJumpPrev = p.hasJumpNext = p.toJumpPrev = p.toJumpNext = null, // to PREV JUMP / NEXT JUMP view
+        p.hasFirst = p.hasLast = p.toFirst = p.toLast = null;               // to FIRST / LAST view
+
+        // Basic props
+        p.lastPage = Math.ceil(p.totalArticles / p.rowsPerPage);
+        p.currView = Math.ceil(p.currPage / p.pagesPerView + 1) - 1;
+
+        // min, max
+        p.max = Math.min(p.currView * p.pagesPerView, p.lastPage);
+        p.min = Math.max((p.currView - 1) * p.pagesPerView + 1, 1);
+
+        // prev, next
+        p.hasPrev = p.min > p.rowsPerPage;
+        p.hasNext = p.max < p.lastPage;
+        if(p.hasPrev) p.toPrev = p.min - p.pagesPerView;
+        if(p.hasNext) p.toNext = p.max + 1;
+
+        // first, last
+        p.hasFirst = p.min > p.pagesPerView * 2;
+        p.hasLast = p.max + p.pagesPerView < p.lastPage;
+        if(p.hasFirst) p.toFirst = 1;
+        if(p.hasLast) p.toLast = Math.min(Math.floor(p.lastPage / p.pagesPerView) * p.pagesPerView + 1, p.lastPage);
+
+        // jumpBefore, jumpNext
+        // You maybe need use this if you need to jump over than just one view.
+        if(!!p.jumpAmount) { // page amount for jumping
+            p.toJumpPrev = p.min - p.jumpAmount;
+            p.toJumpNext = p.min + p.jumpAmount;
+            p.hasJumpPrev = p.toJumpPrev >= 1;
+            p.hasJumpNext = p.toJumpNext <= p.lastPage;
+        }    return p;
+
+    }
+    
+}
+
 // TODO: 추가적인  넣는 옵션 추가, 연속출력 여부 담는 옵션 추가
 // 필요 정보를 담은 객체를 입력하면 페이징 정보를 추가해서 반환해 주는 함수
 // 필요 정보: 객체. currPage(현재페이지), totalArticles(전체 글 수), rowsPerPage(1페이지 당 글 수), pagesPerView(1뷰 당 페이지 수)
 // TODO: jumpAmount - 값체크 추가. pagesPreView보다는 커야 하며, 또한 고정형으로 만들 경우 뷰의 n배가 되어야 한다. (결과값으로 뷰 첫페이지값을 써서 그럼)
 // IE 11 CAPABLE
-function getPagingProps(p) {
-
-    // Chksum
-    if(typeof p === "undefined") throw new Error("'p' object required");
-    if(typeof p != "object") throw new Error("'p' must be an object");
-    ["currPage", "totalArticles", "rowsPerPage", "pagesPerView"].forEach(function(i) {
-        if(!p.hasOwnProperty(i) || isNaN(parseFloat(p[i]))) throw new Error("'" + i + "' has an error");
-    });
-
-    // Pre-assign calculated values
-    p.currView = p.min = p.max = null,                                  // Infoes about current view
-    p.hasPrev = p.hasNext = p.toPrev = p.toNext = null,                 // to PREV / NEXT view
-    p.hasJumpPrev = p.hasJumpNext = p.toJumpPrev = p.toJumpNext = null, // to PREV JUMP / NEXT JUMP view
-    p.hasFirst = p.hasLast = p.toFirst = p.toLast = null;               // to FIRST / LAST view
-
-    // Basic props
-    p.lastPage = Math.ceil(p.totalArticles / p.rowsPerPage);
-    p.currView = Math.ceil(p.currPage / p.pagesPerView + 1) - 1;
-
-    // min, max
-    p.max = Math.min(p.currView * p.pagesPerView, p.lastPage);
-    p.min = Math.max((p.currView - 1) * p.pagesPerView + 1, 1);
-
-    // prev, next
-    p.hasPrev = p.min > p.rowsPerPage;
-    p.hasNext = p.max < p.lastPage;
-    if(p.hasPrev) p.toPrev = p.min - p.pagesPerView;
-    if(p.hasNext) p.toNext = p.max + 1;
-
-    // first, last
-    p.hasFirst = p.min > p.pagesPerView * 2;
-    p.hasLast = p.max + p.pagesPerView < p.lastPage;
-    if(p.hasFirst) p.toFirst = 1;
-    if(p.hasLast) p.toLast = Math.min(Math.floor(p.lastPage / p.pagesPerView) * p.pagesPerView + 1, p.lastPage);
-
-    // jumpBefore, jumpNext
-    // You maybe need use this if you need to jump over than just one view.
-    if(!!p.jumpAmount) { // page amount for jumping
-        p.toJumpPrev = p.min - p.jumpAmount;
-        p.toJumpNext = p.min + p.jumpAmount;
-        p.hasJumpPrev = p.toJumpPrev >= 1;
-        p.hasJumpNext = p.toJumpNext <= p.lastPage;
-    }    return p;
-
-}
+function 
 
 
 // Result example
