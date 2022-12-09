@@ -1,56 +1,81 @@
 class pagingMaster {
 
-    constructor(currPage, totalArticles, rowsPerPage, pagesPerView) {
-
-
-        this.currPage = currPage;
-        this.totalArticles = totalArticles;
-        this.rowsPerPage = rowsPerPage;
-        this.pagesPerView = pagesPerView;
+    constructor(params) {
+        this.set(params);
     }
     
-    getPagingProps(p) {
+    // Assign all the essential props
+    setInputValues(params) {
 
-        // Chksum
-        if(typeof p === "undefined") throw new Error("'p' object required");
-        if(typeof p != "object") throw new Error("'p' must be an object");
-        ["currPage", "totalArticles", "rowsPerPage", "pagesPerView"].forEach(function(i) {
-            if(!p.hasOwnProperty(i) || isNaN(parseFloat(p[i]))) throw new Error("'" + i + "' has an error");
+        // Chksum 1 - typeof params
+        if(typeof params === "undefined") this.errorMsg("parameter object required");
+        if(typeof params != "object") this.errorMsg("parameter must be an object");
+        // Chksum 2 - param length
+        if(chkTargets.length > 4) {
+            this.errorMsg('The parameter has the value(s) which is not required for creating class.')
+        }
+        // Chksum 3 - sub variables of params
+        const chkTargets = ["currPage", "totalArticles", "rowsPerPage", "pagesPerView"];
+        chkTargets.forEach((i) => {
+            if(!params.hasOwnProperty(i) || isNaN(parseFloat(params[i]))) {
+                this.errorMsg(`The value '${i}' has an error`);
+            }
         });
 
-        // Pre-assign calculated values
-        p.currView = p.min = p.max = null,                                  // Infoes about current view
-        p.hasPrev = p.hasNext = p.toPrev = p.toNext = null,                 // to PREV / NEXT view
-        p.hasJumpPrev = p.hasJumpNext = p.toJumpPrev = p.toJumpNext = null, // to PREV JUMP / NEXT JUMP view
-        p.hasFirst = p.hasLast = p.toFirst = p.toLast = null;               // to FIRST / LAST view
+        Object.assign(this, params);
+
+    }
+
+    // Initialize or reset all the calculated props
+    reset() {
+
+        // Infoes about current view
+        this.currView = this.min = this.max = null,
+
+        // to PREV / NEXT view
+        this.hasPrev = this.hasNext = this.toPrev = this.toNext = null,
+
+        // to PREV JUMP / NEXT JUMP view
+        this.hasJumpPrev = this.hasJumpNext = this.toJumpPrev = this.toJumpNext = null,
+
+        // to FIRST / LAST view
+        this.hasFirst = this.hasLast = this.toFirst = this.toLast = null;
+
+    }
+    
+    // (Re-)calculate ALL prop values
+    getPagingProps(params) {
+
+        // If gets params then 
+        if(params) this.set(params);
 
         // Basic props
-        p.lastPage = Math.ceil(p.totalArticles / p.rowsPerPage);
-        p.currView = Math.ceil(p.currPage / p.pagesPerView + 1) - 1;
+        this.lastPage = Math.ceil(this.totalArticles / this.rowsPerPage);
+        this.currView = Math.ceil(this.currPage / this.pagesPerView + 1) - 1;
 
         // min, max
-        p.max = Math.min(p.currView * p.pagesPerView, p.lastPage);
-        p.min = Math.max((p.currView - 1) * p.pagesPerView + 1, 1);
+        this.max = Math.min(this.currView * this.pagesPerView, this.lastPage);
+        this.min = Math.max((this.currView - 1) * this.pagesPerView + 1, 1);
 
         // prev, next
-        p.hasPrev = p.min > p.rowsPerPage;
-        p.hasNext = p.max < p.lastPage;
-        if(p.hasPrev) p.toPrev = p.min - p.pagesPerView;
-        if(p.hasNext) p.toNext = p.max + 1;
+        this.hasPrev = this.min > this.rowsPerPage;
+        this.hasNext = this.max < this.lastPage;
+        if(this.hasPrev) this.toPrev = this.min - this.pagesPerView;
+        if(this.hasNext) this.toNext = this.max + 1;
 
         // first, last
-        p.hasFirst = p.min > p.pagesPerView * 2;
-        p.hasLast = p.max + p.pagesPerView < p.lastPage;
-        if(p.hasFirst) p.toFirst = 1;
-        if(p.hasLast) p.toLast = Math.min(Math.floor(p.lastPage / p.pagesPerView) * p.pagesPerView + 1, p.lastPage);
+        this.hasFirst = this.min > this.pagesPerView * 2;
+        this.hasLast = this.max + this.pagesPerView < this.lastPage;
+        if(this.hasFirst) this.toFirst = 1;
+        if(this.hasLast) this.toLast = Math.min(Math.floor(this.lastPage / this.pagesPerView) * this.pagesPerView + 1, this.lastPage);
 
         // jumpBefore, jumpNext
         // You maybe need use this if you need to jump over than just one view.
-        if(!!p.jumpAmount) { // page amount for jumping
-            p.toJumpPrev = p.min - p.jumpAmount;
-            p.toJumpNext = p.min + p.jumpAmount;
-            p.hasJumpPrev = p.toJumpPrev >= 1;
-            p.hasJumpNext = p.toJumpNext <= p.lastPage;
+        if(!!this.jumpAmount) { // page amount for jumping
+            this.toJumpPrev = this.min - this.jumpAmount;
+            this.toJumpNext = this.min + this.jumpAmount;
+            this.hasJumpPrev = this.toJumpPrev >= 1;
+            this.hasJumpNext = this.toJumpNext <= this.lastPage;
         }    return p;
 
     }
@@ -68,7 +93,7 @@ function
 // Result example
 
 // Library: n 앞에 width만큼 공백 붙이기
-function nPad(nn, width) {
+nPad(nn, width) {
     let n = new String(nn);
     return n.length >= width ? n : new Array(width - n.length + 1).join(' ') + n;
 }
@@ -86,24 +111,24 @@ var p = {
 var resultTxt = "";
 let i = 1;
 getPagingProps(p);
-resultTxt += "currPage: "      + p.currPage    + ", totalArticles: " + p.totalArticles
-          +  ", rowsPerPage: " + p.rowsPerPage + ", pagesPerView: "  + p.pagesPerView
-          + (p.jumpAmount ? (", jumpAmount: " + p.jumpAmount) : "")
+resultTxt += "currPage: "      + this.currPage    + ", totalArticles: " + this.totalArticles
+          +  ", rowsPerPage: " + this.rowsPerPage + ", pagesPerView: "  + this.pagesPerView
+          + (this.jumpAmount ? (", jumpAmount: " + this.jumpAmount) : "")
           +  "\n\n";
 
 for(let i = 1; i < getPagingProps(p).lastPage; i++) {
 
-    p.currPage = i;
+    this.currPage = i;
     const props = getPagingProps(p);
     resultTxt
-    += "PAGE."      + nPad(p.currPage, 4) + " / VIEW_ROUND." + nPad(p.currView,   4) + " / PAGE." + nPad(p.min, 4) + " ~ " + nPad(p.max, 4) + "     "
-    +  "▶    <<< " + (p.hasFirst    * 1 ? "■" : "□") + " & " + nPad(p.toFirst,    4) + "     "
-    +  "│     <<  " + (p.hasJumpPrev * 1 ? "■" : "□") + " & " + nPad(p.toJumpPrev, 4) + "     "
-    +  "│     <  "  + (p.hasPrev     * 1 ? "■" : "□") + " & " + nPad(p.toPrev,     4) + "          "
-    +  "★★ [" + nPad("P" + p.currPage, 4) + "] ★★         >  "  + (p.hasNext     * 1 ? "■" : "□") + " & " + nPad(p.toNext,     4) + "     "
-    +  "│     >> "  + (p.hasJumpNext * 1 ? "■" : "□") + " & " + nPad(p.toJumpNext, 4) + "     "
-    +  "│     >>  " + (p.hasLast     * 1 ? "■" : "□") + " & " + nPad(p.toLast,     4) + "\n";
-    if(i % p.pagesPerView == 0) resultTxt += "\n";
+    += "PAGE."      + nPad(this.currPage, 4) + " / VIEW_ROUND." + nPad(this.currView,   4) + " / PAGE." + nPad(this.min, 4) + " ~ " + nPad(this.max, 4) + "     "
+    +  "▶    <<< " + (this.hasFirst    * 1 ? "■" : "□") + " & " + nPad(this.toFirst,    4) + "     "
+    +  "│     <<  " + (this.hasJumpPrev * 1 ? "■" : "□") + " & " + nPad(this.toJumpPrev, 4) + "     "
+    +  "│     <  "  + (this.hasPrev     * 1 ? "■" : "□") + " & " + nPad(this.toPrev,     4) + "          "
+    +  "★★ [" + nPad("P" + this.currPage, 4) + "] ★★         >  "  + (this.hasNext     * 1 ? "■" : "□") + " & " + nPad(this.toNext,     4) + "     "
+    +  "│     >> "  + (this.hasJumpNext * 1 ? "■" : "□") + " & " + nPad(this.toJumpNext, 4) + "     "
+    +  "│     >>  " + (this.hasLast     * 1 ? "■" : "□") + " & " + nPad(this.toLast,     4) + "\n";
+    if(i % this.pagesPerView == 0) resultTxt += "\n";
 
 }
 
