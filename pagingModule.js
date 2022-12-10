@@ -4,8 +4,13 @@
 // TODO: jumpAmount - 값체크 추가. pagesPreView보다는 커야 하며, 또한 고정형으로 만들 경우 뷰의 n배가 되어야 한다. (결과값으로 뷰 첫페이지값을 써서 그럼)
 class pagingMaster {
 
+    errorMsg(msg) {
+        console.log(msg);
+        throw false;
+    }
+
     // 클래스 생성 시 필요 정보: 객체. currPage(현재페이지), totalArticles(전체 글 수), rowsPerPage(1페이지 당 글 수), pagesPerView(1뷰 당 페이지 수)
-    // Required values for making instant is 4 values below
+    // For make an instant you have to pass 4 props below - Hereinafter reffered to 'Essential Props'
     //  - currPage (current page number)
     //  - totalArticles (total articles the board has)
     //  - rowsPerPage (displaying row amount per one page; ex) 10 rows per page, 5 rows per page, etc.)
@@ -18,8 +23,8 @@ class pagingMaster {
     setInputValues(params) {
 
         // Chksum 1 - typeof params
-        if(typeof params === "undefined") this.errorMsg("parameter object required");
-        if(typeof params != "object") this.errorMsg("parameter must be an object");
+        if(params === undefined) this.errorMsg("parameter required");
+        if(typeof params != "object") this.errorMsg("parameter must be an Object");
         // Chksum 2 - param length
         if(chkTargets.length > 4) {
             this.errorMsg('The parameter has the value(s) which is not required for creating class.')
@@ -33,6 +38,17 @@ class pagingMaster {
         });
 
         Object.assign(this, params);
+
+    }
+
+    gotoPage(pageNum) {
+
+        // Chksum
+        if(pageNum === undefined) this.errorMsg("pageNum required");
+        pageNum = parseInt(pageNum);
+        if(!isNaN(pageNum)) this.errorMsg("pageNum must be a Number");
+        
+        this.currPage = pageNum;
 
     }
 
