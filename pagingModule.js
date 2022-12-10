@@ -1,7 +1,17 @@
+
+// 필요 정보를 담은 객체를 입력하면 페이징 정보를 추가해서 반환해 주는 클래스
+// TODO: 연속출력 구현
+// TODO: jumpAmount - 값체크 추가. pagesPreView보다는 커야 하며, 또한 고정형으로 만들 경우 뷰의 n배가 되어야 한다. (결과값으로 뷰 첫페이지값을 써서 그럼)
 class pagingMaster {
 
+    // 클래스 생성 시 필요 정보: 객체. currPage(현재페이지), totalArticles(전체 글 수), rowsPerPage(1페이지 당 글 수), pagesPerView(1뷰 당 페이지 수)
+    // Required values for making instant is 4 values below
+    //  - currPage (current page number)
+    //  - totalArticles (total articles the board has)
+    //  - rowsPerPage (displaying row amount per one page; ex) 10 rows per page, 5 rows per page, etc.)
+    //  - pagesPerView (dispalying page amount per one view; ex) 10 pages per one view, 5 pages per one view, etc.)
     constructor(params) {
-        this.set(params);
+        this.setInputValues(params);
     }
     
     // Assign all the essential props
@@ -28,48 +38,40 @@ class pagingMaster {
 
     // Initialize or reset all the calculated props
     reset() {
-
-        // Infoes about current view
-        this.currView = this.min = this.max = null,
-
-        // to PREV / NEXT view
-        this.hasPrev = this.hasNext = this.toPrev = this.toNext = null,
-
-        // to PREV JUMP / NEXT JUMP view
-        this.hasJumpPrev = this.hasJumpNext = this.toJumpPrev = this.toJumpNext = null,
-
-        // to FIRST / LAST view
-        this.hasFirst = this.hasLast = this.toFirst = this.toLast = null;
-
+        this.currView = this.min = this.max = null, // Infoes about current view
+        this.hasPrev = this.hasNext = this.toPrev = this.toNext = null, // for PREV / NEXT view
+        this.hasJumpPrev = this.hasJumpNext = this.toJumpPrev = this.toJumpNext = null, // for PREV JUMP / NEXT JUMP view
+        this.hasFirst = this.hasLast = this.toFirst = this.toLast = null; // for FIRST / LAST view
     }
     
-    // (Re-)calculate ALL prop values
+    // (Re)calculate ALL prop values
     getPagingProps(params) {
 
-        // If gets params then 
-        if(params) this.set(params);
+        // If gets params then initialize, else just reset calc props
+        if(params) this.setInputValues(params);
+        this.reset();
 
-        // Basic props
+        // Set Basic props
         this.lastPage = Math.ceil(this.totalArticles / this.rowsPerPage);
         this.currView = Math.ceil(this.currPage / this.pagesPerView + 1) - 1;
 
-        // min, max
+        // Set min, max
         this.max = Math.min(this.currView * this.pagesPerView, this.lastPage);
         this.min = Math.max((this.currView - 1) * this.pagesPerView + 1, 1);
 
-        // prev, next
+        // Set prev, next
         this.hasPrev = this.min > this.rowsPerPage;
         this.hasNext = this.max < this.lastPage;
         if(this.hasPrev) this.toPrev = this.min - this.pagesPerView;
         if(this.hasNext) this.toNext = this.max + 1;
 
-        // first, last
+        // Set first, last
         this.hasFirst = this.min > this.pagesPerView * 2;
         this.hasLast = this.max + this.pagesPerView < this.lastPage;
         if(this.hasFirst) this.toFirst = 1;
         if(this.hasLast) this.toLast = Math.min(Math.floor(this.lastPage / this.pagesPerView) * this.pagesPerView + 1, this.lastPage);
 
-        // jumpBefore, jumpNext
+        // Set jumpBefore, jumpNext
         // You maybe need use this if you need to jump over than just one view.
         if(!!this.jumpAmount) { // page amount for jumping
             this.toJumpPrev = this.min - this.jumpAmount;
@@ -82,18 +84,10 @@ class pagingMaster {
     
 }
 
-// TODO: 추가적인  넣는 옵션 추가, 연속출력 여부 담는 옵션 추가
-// 필요 정보를 담은 객체를 입력하면 페이징 정보를 추가해서 반환해 주는 함수
-// 필요 정보: 객체. currPage(현재페이지), totalArticles(전체 글 수), rowsPerPage(1페이지 당 글 수), pagesPerView(1뷰 당 페이지 수)
-// TODO: jumpAmount - 값체크 추가. pagesPreView보다는 커야 하며, 또한 고정형으로 만들 경우 뷰의 n배가 되어야 한다. (결과값으로 뷰 첫페이지값을 써서 그럼)
-// IE 11 CAPABLE
-function 
-
-
 // Result example
 
 // Library: n 앞에 width만큼 공백 붙이기
-nPad(nn, width) {
+function nPad(nn, width) {
     let n = new String(nn);
     return n.length >= width ? n : new Array(width - n.length + 1).join(' ') + n;
 }
